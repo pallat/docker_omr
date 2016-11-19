@@ -1,0 +1,45 @@
+version: '2'
+
+services:
+    mongodb:
+        image: library/mongo:2.6.1
+        expose:
+          - 27017
+    api1:
+        build: api
+        image: omr/api:latest
+        command: git pull --rebase origin develop
+        command: /go/src/omr/api/src/omr/api/makebuilddev
+        command: /go/src/omr/api/src/omr/api/api
+        links:
+          - mongodb
+        expose:
+          - 8082
+          - 8182
+    api2:
+        build: api
+        image: omr/api:latest
+        command: git pull --rebase origin develop
+        command: /go/src/omr/api/src/omr/api/makebuilddev
+        command: /go/src/omr/api/src/omr/api/api
+        links:
+          - mongodb
+        expose:
+          - 8082
+          - 8182
+
+    haproxy:
+        build: haproxy
+        image: omr/haproxy:latest
+        # volumes:
+        #   - ./haproxy:/haproxy-override
+        links:
+           - api1
+           - api2
+        ports:
+           - "8082:8082"
+           - "8182:8182"
+
+        expose:
+           - "8082"
+           - "8182"
