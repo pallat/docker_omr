@@ -5,41 +5,75 @@ services:
         image: library/mongo:2.6.1
         expose:
           - 27017
+    repo:
+        build: repo
+        image: omr/repo:latest
+        command: git pull --rebase origin develop
+        command: tail -f /dev/null
+        volumes:
+            - /root/workspace
+    build_api:
+        build: api
+        depends_on:
+            - repo
+        image: omr/api:latest
+        volumes_from:
+            - repo
+        environment:
+            - GOPATH=/root/workspace/omr/api
+        command: /root/workspace/omr/api/src/omr/api/makebuild
     api1:
         build: api
         image: omr/api:latest
-        command: git pull --rebase origin develop
-        command: /go/src/omr/api/src/omr/api/makebuilddev
-        command: /go/src/omr/api/src/omr/api/api
+        volumes_from:
+            - repo
+        environment:
+            - GOPATH=/root/workspace/omr/api
+        depends_on:
+            - build_api
+            - mongodb
         links:
           - mongodb
         expose:
           - 8082
           - 8182
+        command: /root/workspace/omr/api/src/omr/api/api
+
     api2:
         build: api
         image: omr/api:latest
-        command: git pull --rebase origin develop
-        command: /go/src/omr/api/src/omr/api/makebuilddev
-        command: /go/src/omr/api/src/omr/api/api
+        volumes_from:
+            - repo
+        environment:
+            - GOPATH=/root/workspace/omr/api
+        depends_on:
+            - build_api
+            - mongodb
         links:
           - mongodb
         expose:
           - 8082
           - 8182
+        command: /root/workspace/omr/api/src/omr/api/api
 
     haproxy:
         build: haproxy
         image: omr/haproxy:latest
-        # volumes:
-        #   - ./haproxy:/haproxy-override
         links:
            - api1
            - api2
         ports:
            - "8082:8082"
            - "8182:8182"
-
+        depends_on:
+           - api1
+           - api2
         expose:
            - "8082"
            - "8182"
+
+    web:
+        build: web
+        image: omr/web:latest
+        volumes_from:
+          - repo

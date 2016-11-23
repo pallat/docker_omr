@@ -6,7 +6,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN mkdir /root/.ssh/
 # Copy over private key, and set permissions
-ADD id_rsa.pub /root/.ssh/id_rsa.pub
+#ADD id_rsa.pub /root/.ssh/id_rsa.pub
 ADD id_rsa /root/.ssh/id_rsa
 # Create known_hosts
 RUN touch /root/.ssh/known_hosts
