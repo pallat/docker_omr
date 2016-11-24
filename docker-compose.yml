@@ -69,11 +69,20 @@ services:
            - api1
            - api2
         expose:
-           - "8082"
-           - "8182"
+           - 8082
+           - 8182
 
     web:
         build: web
         image: omr/web:latest
         volumes_from:
           - repo
+        links:
+           - haproxy
+        expose:
+          - 80
+        depends_on:
+           - repo
+        command: rm -rf /var/www/html
+        command: ln -s /root/workspace/omr/web/mustache/js/output /var/www/html
+        command: tail -f /dev/null

@@ -1,0 +1,1 @@
+pagespeed EnableFilters add_head,combine_css,combine_javascript,inline_css,inline_javascript,collapse_whitespace;
